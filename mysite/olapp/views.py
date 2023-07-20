@@ -17,6 +17,10 @@ class IndexView(View):
 
 class InstructorLoginView(View):
     def get(self, request, *args, **kwargs):
+        if request.user and request.user.is_authenticated and request.user.is_active and request.user.groups.filter(name='instructors').exists():
+                return HttpResponseRedirect(reverse('olapp:instructor_homepage'))
+        if request.user and request.user.is_authenticated and request.user.is_active:
+            return HttpResponse('You are already logged in. Please logout and try again.')
         form = InstructorLoginForm()
         return render(request, 'olapp/instructor_login.html', {'form': form})
     def post(self, request, *args, **kwargs):
@@ -40,9 +44,9 @@ class InstructorHomepageView(View):
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         if request.user.groups.filter(name='instructors').exists():
-            return HttpResponse('Welcome to the instructor homepage, ' + request.user.username)
+            return render(request, 'olapp/instructor_homepage.html')
         else:
-            return HttpResponse('This page is only accessible to an instructor')
+            return HttpResponse('This page is only accessible to an instructor. Please login as an instructor.')
 
 class LogoutView(View):
     @method_decorator(login_required)
@@ -53,7 +57,7 @@ class LogoutView(View):
 class InstructorSignupView(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return HttpResponse('To create a new user account, please logout first.')
+            return HttpResponse('To create a new instructor account, please logout first.')
         form = InstructorSignupForm()
         return render(request, 'olapp/instructor_signup.html', {'form': form})
 
