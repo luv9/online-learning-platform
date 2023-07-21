@@ -30,7 +30,7 @@ class VideoLecture(models.Model):
         ordering=['order']
 
 class Quiz(models.Model):
-    prequisite = models.TextField()
+    prerequisite = models.TextField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     description = models.TextField()

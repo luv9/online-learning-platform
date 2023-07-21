@@ -13,3 +13,15 @@ class InstructorSignupForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = Instructor
         fields = ('username', 'password1', 'password2', 'first_name', 'last_name', 'description')
+
+class QuizForm(forms.ModelForm):
+    class Meta:
+        model = Quiz
+        fields = ['title', 'description', 'prerequisite']
+
+class ChoiceForm(forms.Form):
+    choice_text = forms.CharField(max_length=200)
+    is_correct = forms.BooleanField(required=False)
+
+class QuestionForm(forms.Form):
+    question_text = forms.CharField(max_length=200)
