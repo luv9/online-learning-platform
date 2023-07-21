@@ -3,7 +3,6 @@ from .models import *
 # Register your models here.
 admin.site.register(Instructor)
 admin.site.register(Course)
-# admin.site.register(ContentType)
 admin.site.register(VideoLecture)
 admin.site.register(Quiz)
 admin.site.register(Question)

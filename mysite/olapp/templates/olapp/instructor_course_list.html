@@ -1,0 +1,19 @@
+{% extends 'olapp/instructor_base.html' %}
+{% block title %} Courses {%endblock%}
+
+{% block myhdg %} OLAPP {%endblock%}
+{% block body_block %}
+
+<h2>Your Courses</h2>
+<a href="{% url 'olapp:instructor_course_create' %}">Add Course</a>
+<ul>
+    {% for course in courses %}
+        <li>
+            <b>Name:</b> {{ course.name }} <b>Price:</b>{{ course.price }} <b>Description:</b>{{ course.description }}
+            <a href="{% url 'olapp:instructor_course_edit' course.id %}">Edit</a>
+        </li>
+    {% empty %}
+        <li>No courses yet.</li>
+    {% endfor %}
+</ul>
+{%endblock%}

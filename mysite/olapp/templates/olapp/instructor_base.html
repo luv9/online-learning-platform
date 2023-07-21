@@ -14,6 +14,7 @@
         <div>
             <ul>
                 <li class="hbar1"><a href = "{% url 'olapp:instructor_homepage'%}"> Home </a></li>
+                <li class="hbar1"><a href = "{% url 'olapp:instructor_course_list'%}"> Courses </a></li>
                 {% if user.is_authenticated %}
                     <li class="hbar1"><a href = "{% url 'olapp:logout'%}"> Logout </a><br/></li>
                 {% else %}
