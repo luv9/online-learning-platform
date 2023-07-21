@@ -11,6 +11,7 @@
         <li>
             <b>Name:</b> {{ course.name }} <b>Price:</b>{{ course.price }} <b>Description:</b>{{ course.description }}
             <a href="{% url 'olapp:instructor_course_edit' course.id %}">Edit</a>
+            <a href="{% url 'olapp:instructor_course_detail' course.id %}">View</a>
         </li>
     {% empty %}
         <li>No courses yet.</li>

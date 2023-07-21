@@ -2,15 +2,18 @@
 <p>{{ course.description }}</p>
 
 <h2>Video Lectures</h2>
-{% for videolecture in course.videolecuture_set.all %}
-    <p>{{ videolecture.title }}</p>
+{% for video_lecture in course.videolecture_set.all %}
+    <h3>{{ video_lecture.title }}</h3>
+    <p>{{ video_lecture.description }}</p>
+    <a href="{% url 'olapp:instructor_video_stream' pk=video_lecture.id %}">
+        <button>View Video</button>
+    </a>
 {% endfor %}
 
-<a href="{% url 'olapp:instructor_add-videolecture' course.id %}">Add Video Lecture</a>
+<a href="{% url 'olapp:instructor_add_videolecture' course.id %}">Add Video Lecture</a>
 
 <h2>Quizzes</h2>
 {% for quiz in course.quiz_set.all %}
     <p>{{ quiz.title }}</p>
 {% endfor %}
 
-<a href="{% url 'olapp:instructor_add-quiz' course.id %}">Add Quiz</a>

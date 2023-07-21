@@ -1,6 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import Http404
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Course
@@ -16,6 +16,8 @@ from django.contrib.auth.models import Group
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.http import StreamingHttpResponse, HttpResponseForbidden
+
 
 class InstructorCourseListView(LoginRequiredMixin, ListView):
     model = Course
@@ -120,4 +122,54 @@ class InstructorSignupView(View):
             return HttpResponseRedirect(reverse('olapp:instructor_login'))
         else:
             return HttpResponse('Some error occurred with the signup form. Please try again.')
+
+
+class InstructorCourseDetailView(DetailView):
+    model = Course
+    template_name = 'olapp/instructor_course_detail.html'
+
+
+class InstructorVideoLectureCreateView(View):
+    def get(self, request, *args, **kwargs):
+        form = VideoLectureForm()
+        return render(request, 'olapp/instructor_videolecture_form.html', {'form': form})
+    
+
+    def post(self, request, *args, **kwargs):
+        form = VideoLectureForm(request.POST, request.FILES)
+        if form.is_valid():
+            video = form.cleaned_data['video_file']
+            video_data = video.read()
+
+            # assuming the course id is being passed as a URL parameter
+            course_id = self.kwargs['pk']
+            course = Course.objects.get(id=course_id)
+
+            # create a new VideoLecture instance with this data
+            a = VideoLecture.objects.create(
+                video=video_data,
+                order=form.cleaned_data['order'],
+                title=form.cleaned_data['title'],
+                description=form.cleaned_data['description'],
+                course=course  # link the VideoLecture to the course
+            )
+
+            # redirect to the course detail page after saving
+            return redirect('olapp:instructor_course_detail', pk=course_id)
+        
+        return render(request, 'olapp/instructor_add_video.html', {'form': form})
+    
+
+class InstructorVideoStreamView(View):
+    def get(self, request, *args, **kwargs):
+        videolecture = get_object_or_404(VideoLecture, pk=kwargs['pk'])
+
+        # Check if the instructor has access to the course
+        course = videolecture.course
+        if course.instructor != request.user.instructor:
+            return HttpResponseForbidden('You do not have access to this course.')
+
+        # Create the HttpResponse with the binary data and the appropriate content type
+        response = HttpResponse(videolecture.video, content_type='video/mp4')
+        return response
 
