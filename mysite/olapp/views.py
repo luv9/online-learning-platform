@@ -247,33 +247,34 @@ def create_questions(request, course_no, quiz_no):
 
 
 
-# class AttemptQuizView(View):
-#     @method_decorator(login_required)
-#     def get(self, request, *args, **kwargs):
-#         if not(request.user.groups.filter(name='students').exists()):
-#             return HttpResponse('Please logout and login as the student to access the quiz')
+class AttemptQuizView(View):
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+        if not(request.user.groups.filter(name='students').exists()):
+            return HttpResponse('Please logout and login as the student to access the quiz')
         
-#         quiz_no = kwargs['quiz_no']
-#         course_no = kwargs['course_no']
-#         quiz = get_object_or_404(Quiz, pk=quiz_no)
-#         course = get_object_or_404(Course, pk=course_no)
-#         student = request.user.student
-#         student_courses = student.courses.all()
-#         if student.membership == 'S' and not(course in student_courses):
-#             return HttpResponse('Please enroll in the course and then retry')
-#         if not(quiz.course == course):
-#             return HttpResponse('No such quiz found for this course')
-#         questions = quiz.question_set.all()
-#         question_list = []
-#         for question in questions:
-#             print(question.question_text)
-#             choices = question.choice_set.all()
-#             for choice in choices:
-#                 print(choice.choice_text)
-#             print('*****')
-#             current_question = {'question_text': question, 'choices': choices}
-#             question_list.append(current_question)
-#         return render(request, )
-# class QuizScoreView(View):
-#     def get(request, *args, **kwargs):
-#         pass
+        quiz_no = kwargs['quiz_no']
+        course_no = kwargs['course_no']
+        quiz = get_object_or_404(Quiz, pk=quiz_no)
+        course = get_object_or_404(Course, pk=course_no)
+        student = request.user.student
+        student_courses = student.courses.all()
+        if student.membership == 'S' and not(course in student_courses):
+            return HttpResponse('Please enroll in the course and then retry')
+        if not(quiz.course == course):
+            return HttpResponse('No such quiz found for this course')
+        questions = quiz.question_set.all()
+        question_list = []
+        for question in questions:
+            print(question.question_text)
+            choices = question.choice_set.all()
+            for choice in choices:
+                print(choice.choice_text)
+            print('*****')
+            current_question = {'question_text': question, 'choices': choices}
+            question_list.append(current_question)
+        # return render(request, )
+        return HttpResponse('hello')
+class QuizScoreView(View):
+    def get(request, *args, **kwargs):
+        pass
