@@ -4,7 +4,7 @@
     
     <form action="{% url 'olapp:create_quiz' course.id %}" method="post">
         {% csrf_token %}
-        {{form}}
+        {{form.as_table}}
         <input type="submit" value="Save quiz and add questions">
     </form>
 {% endblock %}
