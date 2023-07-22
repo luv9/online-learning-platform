@@ -14,5 +14,7 @@ urlpatterns = [
     path('instructor/courses/view/<int:pk>/', views.InstructorCourseDetailView.as_view(), name='instructor_course_detail'),
     path('instructor/courses/<int:pk>/add_videolecture/', views.InstructorVideoLectureCreateView.as_view(), name='instructor_add_videolecture'),
     path('instructor/video/<int:pk>/', views.InstructorVideoStreamView.as_view(), name='instructor_video_stream'),
+    path('instructor/course/<int:course_no>/quiz/create', views.CreateQuizView.as_view(), name='create_quiz'),
+    path('instructor/course/<int:course_no>/quiz/<int:quiz_no>/create/questions', views.create_questions, name='create_questions'),
 
 ]

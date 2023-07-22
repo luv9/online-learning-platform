@@ -11,7 +11,7 @@ from django.views import View
 from .forms import *
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect
@@ -172,4 +172,120 @@ class InstructorVideoStreamView(View):
         # Create the HttpResponse with the binary data and the appropriate content type
         response = HttpResponse(videolecture.video, content_type='video/mp4')
         return response
+class CreateQuizView(View):
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+        if request.user.groups.filter(name='instructors').exists():
+            course_no = kwargs['course_no']
+            course = get_object_or_404(Course, pk=course_no)
+            instructor = course.instructor
+            if request.user.instructor == instructor:
+                form = QuizForm()
+                context = {
+                    'course': course,
+                    'form': form,
+                }
+                return render(request, 'olapp/create_quiz.html', context)
+            else :
+                return HttpResponse('Please login as the instructor to access this course')
+        else :
+            return HttpResponse('Please login as the instructor to access this course')
+    
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        if request.user.groups.filter(name='instructors').exists():
+            course_no = kwargs['course_no']
+            course = get_object_or_404(Course, pk=course_no)
+            instructor = course.instructor
+            if request.user.instructor == instructor:
+                form = QuizForm(request.POST)
+                if form.is_valid():
+                    new_quiz = form.save(commit=False)
+                    new_quiz.course = course
+                    new_quiz.save()
+                    return HttpResponseRedirect(reverse('olapp:create_questions', args=[course.id, new_quiz.id]))
+            else :
+                return HttpResponse('Please login as the instructor to access this course')
+        else :
+            return HttpResponse('Please login as the instructor to access this course')
+        
+
+@login_required
+def create_questions(request, course_no, quiz_no):
+    current_question = request.session.get('current_question', None)
+    questions = request.session.get('questions', [])
+    quiz = get_object_or_404(Quiz, pk=quiz_no)
+    course = get_object_or_404(Course, pk=course_no)
+    if request.user.groups.filter(name='instructors').exists():
+        instructor = course.instructor
+        if request.user.instructor == instructor:
+            if quiz.course == course:
+                pass
+            else:
+                return HttpResponse('Please access the correct course to add questions to this quiz')
+        else :
+            return HttpResponse('Please login as the instructor to access this course')
+    else :
+        return HttpResponse('Please login as the instructor to access this course')
+    
+    # if current_question == None:
+    #     print('None haiiiii')
+    
+    if request.method == 'POST':
+        form = ChoiceForm(request.POST)
+        question_form = QuestionForm(request.POST)
+
+        if form.is_valid() and 'add_choice' in request.POST:
+            # print('thereeee')
+            choice_text = form.cleaned_data['choice_text']
+            is_correct = form.cleaned_data['is_correct']
+
+            # Add the choice to the current question's list of choices
+            current_question['choices'].append((choice_text, is_correct))
+
+            # Clear the choice form to add the next choice
+            form = ChoiceForm()
+
+        elif question_form.is_valid() and 'add_question' in request.POST:
+            question_text = question_form.cleaned_data['question_text']
+            # print('hereeee')
+            # Save the current question and create a new one
+            if current_question is not None:
+                questions.append(current_question)
+
+            current_question = {'question_text': question_text, 'choices': []}
+
+            # Clear the question form to add the next question
+            question_form = QuestionForm()
+
+        elif 'finish_question' in request.POST:
+            # Save the current question without creating a new one
+            choice_text = form.cleaned_data['choice_text']
+            is_correct = form.cleaned_data['is_correct']
+
+            # Add the choice to the current question's list of choices
+            if current_question is not None:
+                current_question['choices'].append((choice_text, is_correct))
+            if current_question is not None:
+                questions.append(current_question)
+                current_question = None
+
+        elif 'submit_quiz' in request.POST:
+
+            for question_data in questions:
+                question = Question.objects.create(quiz=quiz, question_text=question_data['question_text'])
+
+                for choice_data in question_data['choices']:
+                    text, is_correct = choice_data
+                    Choice.objects.create(question=question, choice_text=text, is_correct=is_correct)
+            request.session.pop('current_question', None)
+            request.session.pop('questions', None)
+            return HttpResponseRedirect(reverse('olapp:instructor_homepage'))
+
+    else:
+        form = ChoiceForm()
+        question_form = QuestionForm()
+    request.session['current_question'] = current_question
+    request.session['questions'] = questions
+    return render(request, 'olapp/create_questions.html', {'form': form, 'question_form': question_form, 'questions': questions, 'current_question': current_question, 'quiz': quiz, 'course': course})
 

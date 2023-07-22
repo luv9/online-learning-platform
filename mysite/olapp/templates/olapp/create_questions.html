@@ -1,0 +1,64 @@
+{% extends 'olapp/instructor_base.html' %}
+{% block body_block %}
+    <h2>Add questions for <u>{{quiz.title}}</u> </h2>
+    {% if questions|length > 0 %}
+        <h3>Questions:</h3>
+        {% for question in questions %}
+            <h4>{{ question.question_text }}</h4>
+            {% for choice_text, is_correct in question.choices %}
+            {{ choice_text }} {% if is_correct %}(Correct){% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% else %}
+        <h3>No questions so far!</h3>
+    {% endif %}
+
+    {% comment %} <form action="{% url 'olapp:create_questions' course.id quiz.id %}" method="post">
+        {% csrf_token %}
+        {% if current_question %}
+            <h2>Current Question:</h2>
+            <p>{{ current_question.question_text }}</p>
+
+            <h2>Add Choices:</h2>
+            {{ form.as_p }}
+            <button type="submit" name="add_choice">Add Choice</button>
+            <button type="submit" name="finish_question">Finish Question</button>
+        {% else %}
+            <h2>Enter a Question:</h2>
+            {{ question_form.as_p }}
+            <button type="submit" name="add_question">Add Question</button>
+        {% endif %}
+
+        {% if questions %}
+            <button type="submit" name="submit_quiz">Submit Quiz</button>
+        {% endif %}
+    </form> {% endcomment %}
+
+    {% if current_question %}
+        <h2>Current Question:</h2>
+        <p>{{ current_question.question_text }}</p>
+
+        <h2>Add Choices:</h2>
+        <form method="post" id="choices-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" name="add_choice">Add Choice</button>
+            <button type="submit" name="finish_question">Finish Question</button>
+        </form>
+    {% else %}
+        <h2>Enter a Question:</h2>
+        <form method="post" id="question-form">
+            {% csrf_token %}
+            {{ question_form.as_p }}
+            <button type="submit" name="add_question">Add Question</button>
+        </form>
+    {% endif %}
+
+    {% if questions %}
+        <form method="post" id="submit-quiz-form">
+            {% csrf_token %}
+            <button type="submit" name="submit_quiz">Submit Quiz</button>
+        </form>
+    {% endif %}
+  
+{% endblock %}

@@ -29,3 +29,15 @@ class VideoLectureForm(forms.ModelForm):
         model = VideoLecture
         fields = ['order', 'title', 'description']  # video is not included here
          # this is a non-model field to handle file upload
+
+class QuizForm(forms.ModelForm):
+    class Meta:
+        model = Quiz
+        fields = ['title', 'description', 'prerequisite']
+
+class ChoiceForm(forms.Form):
+    choice_text = forms.CharField(max_length=200)
+    is_correct = forms.BooleanField(required=False)
+
+class QuestionForm(forms.Form):
+    question_text = forms.CharField(max_length=200)
