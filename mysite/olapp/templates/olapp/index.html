@@ -1,5 +1,3 @@
-Welcome to index page! There is nothing to see here.
-
 {% if user.is_authenticated %}
     <li class="hbar1"><a href = "{% url 'olapp:instructor_homepage'%}"> Instructor Homepage </a><br/></li>
     <li class="hbar1"><a href = "{% url 'olapp:student_homepage'%}"> Student Homepage </a><br/></li>
@@ -10,3 +8,4 @@ Welcome to index page! There is nothing to see here.
     <li class="hbar1"><a href = "{% url 'olapp:student_login'%}"> Student Login </a><br/></li>
     <li class="hbar1"><a href = "{% url 'olapp:student_signup'%}"> Student Signup </a><br/></li>
 {% endif %}
+
