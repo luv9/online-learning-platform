@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{% static 'olapp/style.css' %}"/>
+        <title> Student - {% block title %} Welcome! {% endblock %}</title>
+    </head>
+    <body>
+        <div>
+            <h1>{% block myhdg %} Welcome to our online learning platform {% endblock %}</h1>
+            {% block body_block %}*** {% endblock %}
+        </div>
+        <hr />
+        <div>
+            <ul>
+                <li class="hbar1"><a href = "{% url 'olapp:student_homepage'%}"> Home </a></li>
+                {% if user.is_authenticated %}
+                    <li class="hbar1"><a href = "{% url 'olapp:logout'%}"> Logout </a><br/></li>
+                {% else %}
+                    <li class="hbar1"><a href = "{% url 'olapp:student_login'%}"> Login </a></li>
+                    <li class="hbar1"><a href = "{% url 'olapp:student_register'%}"> Register </a><br/></li>
+                {% endif %}
+            </ul>
+        </div>
+    </body>
+</html>

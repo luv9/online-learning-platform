@@ -1,0 +1,33 @@
+{% load static %}
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{% static 'olapp/style.css' %}"/>
+        <title>{% block title %} Student Signup {% endblock %}</title>
+    </head>
+    <body>
+        <div>
+            <h1>{% block myhdg %} Welcome to our online learning platform {% endblock %}</h1>
+            {% block body_block %}
+                <form action="{% url 'olapp:student_signup' %}", method='post'>
+                    {% csrf_token %}
+                    {{form.as_table}}
+                    <input type="submit" value="Signup">
+                </form>
+
+                {% comment %} {% if form.errors %}
+                    <div>
+                        <strong>Error(s):</strong>
+                        <ul>
+                            {% for field_errors in form.errors %}
+                                {% for error in field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+            {% endif %} {% endcomment %}
+            {% endblock %}
+        </div>
+        <hr />
+    </body>
+</html>

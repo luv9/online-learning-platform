@@ -1,0 +1,14 @@
+{% extends 'olapp/student_base.html' %}
+{% block body_block %}
+    <p>Welcome, {{user.username}}. </p>
+    {% if student.courses.all %}
+        <h3>Enrolled courses: </h3>
+        <ul>
+        {% for course in student.courses.all %}
+            <li><p>{{course.name}}</p></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <h4>You are not enrolled in any courses as of now.</h4>
+    {% endif %}
+{% endblock %}

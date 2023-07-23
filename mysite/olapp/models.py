@@ -53,6 +53,11 @@ class Choice(models.Model):
 
 class Student(User):
     courses = models.ManyToManyField(Course)
+    MEMBERSHIP_CHOICES = [
+        ('G', 'Gold'),
+        ('S', 'Silver')
+    ]
+    membership = models.CharField(choices=MEMBERSHIP_CHOICES, default='S', max_length=1)
     class Meta:
         verbose_name = "Student"
         verbose_name_plural = "Students"
@@ -70,3 +75,4 @@ class QuizScore(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     score = models.IntegerField()
+    graded = models.BooleanField(default=False)
