@@ -26,7 +26,7 @@ body {
 .container {
     text-align: center;
     max-width: 450px; /* Reduce the container width */
-    max-height: 784px;
+    max-height: 810px;
     margin-top: 20px; /* Add some margin around the container to center it */
     flex: 1;
     background-color: #ffffff; /* White background */
