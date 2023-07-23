@@ -1,0 +1,10 @@
+{% extends 'olapp/student_base.html' %}
+{% block body_block %}
+    <h2>You will only get one attempt for this quiz. Do not hit refresh or go back.</h2>
+    <h3>{{quiz.title}}</h3>
+    <form action="{% url 'olapp:attempt_quiz' course.id quiz.id %}" method="post">
+        {% csrf_token %}
+        {{form}}
+        <input type="submit" value="Submit Quiz">
+    </form>
+{% endblock %}

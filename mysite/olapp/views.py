@@ -227,7 +227,6 @@ def create_questions(request, course_no, quiz_no):
                 current_question = None
 
         elif 'submit_quiz' in request.POST:
-
             for question_data in questions:
                 question = Question.objects.create(quiz=quiz, question_text=question_data['question_text'])
 
@@ -248,6 +247,26 @@ def create_questions(request, course_no, quiz_no):
 
 
 class AttemptQuizView(View):
+    def calculate_score(self, user_choices):
+        correct_answers = 0
+        total_answers = 0
+        for question_id, choice_ids in user_choices.items():
+            total_answers+=1
+            question = Question.objects.get(pk=question_id)
+            # print(question)
+            correct_choice_ids = list(
+                Choice.objects.filter(question=question, is_correct=True).values_list('id', flat=True)
+            )
+            # print(correct_choice_ids)
+            # print('******')
+            # print(choice_ids)
+            user_choice_ids = [int(choice_id) for choice_id in choice_ids]
+            if set(user_choice_ids) == set(correct_choice_ids):
+                correct_answers += 1
+        if total_answers == 0:
+            return 0
+        return (correct_answers * 100) // total_answers
+
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         if not(request.user.groups.filter(name='students').exists()):
@@ -263,18 +282,76 @@ class AttemptQuizView(View):
             return HttpResponse('Please enroll in the course and then retry')
         if not(quiz.course == course):
             return HttpResponse('No such quiz found for this course')
+        if QuizScore.objects.filter(quiz=quiz).filter(student=student).exists():
+            return HttpResponseRedirect(reverse('olapp:quiz_score', args=[course_no, quiz_no]))
         questions = quiz.question_set.all()
-        question_list = []
-        for question in questions:
-            print(question.question_text)
-            choices = question.choice_set.all()
-            for choice in choices:
-                print(choice.choice_text)
-            print('*****')
-            current_question = {'question_text': question, 'choices': choices}
-            question_list.append(current_question)
-        # return render(request, )
-        return HttpResponse('hello')
+        form = QuizAttemptForm(questions)
+        context = {
+            'form': form,
+            'quiz': quiz,
+            'course': course,
+        }
+        new_attempt = QuizScore()
+        new_attempt.quiz = quiz
+        new_attempt.student = student
+        new_attempt.score = 0
+        new_attempt.save()
+        return render(request, 'olapp/attempt_quiz.html', context)
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        if not(request.user.groups.filter(name='students').exists()):
+            return HttpResponse('Please logout and login as the student to access the quiz')
+        quiz_no = kwargs['quiz_no']
+        course_no = kwargs['course_no']
+        quiz = get_object_or_404(Quiz, pk=quiz_no)
+        course = get_object_or_404(Course, pk=course_no)
+        student = request.user.student
+        student_courses = student.courses.all()
+        if student.membership == 'S' and not(course in student_courses):
+            return HttpResponse('Please enroll in the course and then retry')
+        if not(quiz.course == course):
+            return HttpResponse('No such quiz found for this course')
+        if QuizScore.objects.filter(quiz=quiz).filter(student=student).exists():
+            attempted_quiz = QuizScore.objects.filter(quiz=quiz).filter(student=student)[0]
+            if attempted_quiz.graded:
+                return HttpResponseRedirect(reverse('olapp:quiz_score', args=[course_no, quiz_no]))
+            questions = quiz.question_set.all()
+            form = QuizAttemptForm(questions, request.POST)
+            attempted_quiz.graded = True
+            attempted_quiz.score = 0
+            if form.is_valid():
+                calculated_score = 0
+                # Calculate the score
+                user_choices = {key.split('_')[1]: value for key, value in form.cleaned_data.items()}
+                print(user_choices)
+                calculated_score = self.calculate_score(user_choices)
+                attempted_quiz.score = calculated_score
+            attempted_quiz.save()
+            return HttpResponseRedirect(reverse('olapp:quiz_score', args=[course_no, quiz_no]))
+        else:
+            return HttpResponse('Please attempt the quiz first')
+
 class QuizScoreView(View):
-    def get(request, *args, **kwargs):
-        pass
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+        if not(request.user.groups.filter(name='students').exists()):
+            return HttpResponse('Please logout and login as the student to access the quiz')
+        quiz_no = kwargs['quiz_no']
+        course_no = kwargs['course_no']
+        quiz = get_object_or_404(Quiz, pk=quiz_no)
+        course = get_object_or_404(Course, pk=course_no)
+        student = request.user.student
+        student_courses = student.courses.all()
+        if student.membership == 'S' and not(course in student_courses):
+            return HttpResponse('Please enroll in the course and then retry')
+        if not(quiz.course == course):
+            return HttpResponse('No such quiz found for this course')
+        if QuizScore.objects.filter(quiz=quiz).filter(student=student).exists():
+            quizscore = QuizScore.objects.filter(quiz=quiz).filter(student=student)[0]
+            context = {
+                'quiz_title': quizscore.quiz.title,
+                'score': quizscore.score,
+            }
+            return render(request, 'olapp/quiz_score.html', context)
+        return HttpResponse('Please attempt the quiz first to display your grade')

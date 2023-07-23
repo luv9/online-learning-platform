@@ -38,3 +38,14 @@ class StudentSignupForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = Student
         fields = ('username', 'password1', 'password2', 'first_name', 'last_name')
+
+class QuizAttemptForm(forms.Form):
+    def __init__(self, questions, *args, **kwargs):
+        super(QuizAttemptForm, self).__init__(*args, **kwargs)
+        for question in questions:
+            choices = Choice.objects.filter(question=question)
+            self.fields[f'question_{question.id}'] = forms.MultipleChoiceField(
+                label=question.question_text,
+                choices=[(choice.id, choice.choice_text) for choice in choices],
+                widget=forms.CheckboxSelectMultiple
+            )
