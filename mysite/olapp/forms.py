@@ -2,7 +2,7 @@ from django import forms
 from .models import *
 from django.contrib.auth.forms import UserCreationForm
 from .models import Course
-from .fields import BinaryFileField
+# from .fields import BinaryFileField
 
 
 class InstructorLoginForm(forms.Form):
@@ -23,7 +23,7 @@ class StudentLoginForm(forms.Form):
 class InstructorSignupForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = Instructor
-        fields = ('username', 'password1', 'password2', 'first_name', 'last_name', 'description')
+        fields = ('username', 'password1', 'password2', 'first_name', 'last_name', 'email', 'description')
 
 class CourseForm(forms.ModelForm):
     class Meta:
@@ -53,7 +53,7 @@ class QuestionForm(forms.Form):
 class StudentSignupForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = Student
-        fields = ('username', 'password1', 'password2', 'first_name', 'last_name')
+        fields = ('username', 'password1', 'password2', 'first_name', 'last_name', 'email')
 
 class QuizAttemptForm(forms.Form):
     def __init__(self, questions, *args, **kwargs):
