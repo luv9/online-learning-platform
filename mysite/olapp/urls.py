@@ -25,7 +25,16 @@ urlpatterns = [
     path('student/course/<int:course_no>/quiz/<int:quiz_no>/score', views.QuizScoreView.as_view(), name='quiz_score'),
     path('student/course/search', views.SearchCourseView.as_view(), name='search_course'),
     path('instructor/quiz/<int:pk>/', views.InstructorQuizDetailView.as_view(), name='instructor_quiz_detail'),
-    path('payment_done/', views.payment_done, name='payment_done'),
-    path('payment_cancelled/', views.payment_cancelled, name='payment_cancelled'),
     path('pay/', views.pay, name='pay'),
+    path('student/course_brief/<int:pk>/', views.StudentCourseBriefDetailView.as_view(), name='student_course_brief_detail'),
+    path('student/course/view/<int:pk>/', views.StudentCourseDetailView.as_view(), name='student_course_detail'),
+    path('course/<int:pk>/payment/', views.CoursePaymentView.as_view(), name='course_payment'),
+    path('course/<str:pk>/payment_done/', views.PaymentDoneView.as_view(), name='payment_done'),
+    path('course/<int:pk>/payment_cancelled/', views.PaymentCancelledView.as_view(), name='payment_cancelled'),
+    path('paypal/', include('paypal.standard.ipn.urls')),
+    path('student/video/<int:pk>/', views.StudentVideoLectureView.as_view(), name='student_videolecture_view'),
+    path('buy_membership/', views.BuyMembershipView.as_view(), name='buy_membership'),
+    path('membership_payment_done/', views.MembershipPaymentDoneView.as_view(), name='membership_payment_done'),
+    path('membership_payment_cancelled/', views.MembershipPaymentCancelledView.as_view(), name='membership_payment_cancelled'),
+
 ]

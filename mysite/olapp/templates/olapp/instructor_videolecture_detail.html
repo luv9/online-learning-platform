@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ videolecture.title }}</title>
+</head>
+<body>
+    <iframe id="video_player" src="data:video/mp4;base64,{{ video_data }}" width="500" height="300"></iframe>
+    <h1 id="video_title">{{ videolecture.title }}</h1>
+    <p id="video_description">{{ videolecture.description }}</p>
+</body>
+</html>

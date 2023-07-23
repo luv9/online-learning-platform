@@ -1,0 +1,18 @@
+<h1>{{ course.name }}</h1>
+<p>{{ course.description }}</p>
+
+<h2>Video Lectures</h2>
+{% for video_lecture in course.videolecture_set.all %}
+    <h3>{{ video_lecture.title }}</h3>
+    <a href="{% url 'olapp:student_videolecture_view' pk=video_lecture.id %}">
+        <button>View Video</button>
+    </a>
+{% endfor %}
+
+<h2>Quizzes</h2>
+{% for quiz in course.quiz_set.all %}
+    <p>{{ quiz.title }}</p>
+    <a href="{% url 'olapp:instructor_quiz_detail' pk=quiz.id %}">
+        <button>View Quiz</button>
+{% endfor %}
+

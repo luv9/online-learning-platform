@@ -16,6 +16,7 @@
                 <li class="hbar1"><a href = "{% url 'olapp:student_homepage'%}"> Home </a></li>
                 {% if user.is_authenticated %}
                     <li class="hbar1"><a href = "{% url 'olapp:logout'%}"> Logout </a><br/></li>
+                    <li class="hbar1"><a href = "{% url 'olapp:search_course'%}"> Search </a><br/></li>
                 {% else %}
                     <li class="hbar1"><a href = "{% url 'olapp:student_login'%}"> Login </a></li>
                     <li class="hbar1"><a href = "{% url 'olapp:student_register'%}"> Register </a><br/></li>

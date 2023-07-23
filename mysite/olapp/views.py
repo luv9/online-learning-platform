@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 import base64
+from django.views.decorators.csrf import csrf_exempt
 from django.http import Http404
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.urls import reverse_lazy
@@ -21,7 +22,15 @@ from django.db.models import Q
 from paypal.standard.forms import PayPalPaymentsForm
 from django.urls import reverse
 from django.conf import settings
-
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from paypal.standard.ipn.signals import valid_ipn_received
+from django.dispatch import receiver
+from paypal.standard.ipn.models import PayPalIPN
+from django.urls import reverse
 
 class InstructorCourseListView(LoginRequiredMixin, ListView):
     model = Course
@@ -545,3 +554,182 @@ def payment_done(request):
 
 def payment_cancelled(request):
     return render(request, "payment/payment_cancelled.html")
+
+
+class StudentCourseBriefDetailView(LoginRequiredMixin, DetailView):
+    model = Course
+    template_name = 'olapp/student_course_detail_before_purchase.html'
+
+
+class StudentCourseDetailView(LoginRequiredMixin, DetailView):
+    model = Course
+    template_name = 'olapp/student_course_detail.html'
+
+    def get_object(self, queryset=None):
+        """ Retrieve the course only if the logged in user is the instructor """
+        obj = super().get_object(queryset=queryset)
+        print(obj)
+
+        if not obj.id in self.request.user.student.courses.values_list('id', flat=True):
+            messages.error(self.request, 'You do not have permission to view this course.')
+            return redirect('olapp:student_homepage')  # redirect to an appropriate URL
+
+        return obj
+
+
+class CoursePaymentView(LoginRequiredMixin, View):
+    # def dispatch(self, request, *args, **kwargs):
+    #     if not request.user.groups.filter(name='students').exists():
+    #         messages.error(request, "You must be an instructor to create a course.")
+    #         return redirect('olapp:search_course')
+    #     return super().dispatch(request, *args, **kwargs)
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+        course = Course.objects.get(pk=self.kwargs['pk'])
+        student = Student.objects.get(id=request.user.student.id)
+
+        # check if the student is a gold member
+        if student.membership == 'G':
+            # if they are, add the course to their account and redirect to the course detail page
+            student.courses.add(course)
+            return redirect('olapp:student_course_detail', pk=course.id)
+
+        # if they are not, continue with the PayPal form creation process
+        else:
+            host = "https://a336-24-57-115-201.ngrok-free.app"
+
+            paypal_dict = {
+                'business': settings.PAYPAL_RECEIVER_EMAIL,
+                'amount': course.price,
+                'item_name': course.name,
+                'invoice': str(course.id)+"_"+str(student.id),
+                'notify_url': '{}{}'.format(host, reverse('olapp:paypal-ipn')),
+                'return_url': '{}{}'.format(host, reverse('olapp:payment_done',kwargs={'pk': str(course.id)+"_"+str(student.id)})),
+                'cancel_return': '{}{}'.format(host, reverse('olapp:payment_cancelled', kwargs={'pk': course.id})),
+            }
+
+            form = PayPalPaymentsForm(initial=paypal_dict)
+            context = {"form": form, "course": course}
+            return render(request, 'payment/payment.html', context)
+        
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PaymentDoneView(View):
+    def get(self, request, *args, **kwargs):
+        # retrieve the transaction
+        print(kwargs)
+        txn = get_object_or_404(PayPalIPN, invoice=kwargs['pk'])
+
+
+        # make sure the transaction was successful
+        if txn.payment_status == "Completed":
+            # retrieve the user
+            student = Student.objects.get(id=request.user.student.id)
+
+            # retrieve the course
+            id =txn.invoice.split("_")[0]
+            course = Course.objects.get(id=id)
+
+            # add the course to the student
+            student.courses.add(course)
+            student.save()
+
+            # redirect to the course details page
+            return redirect(reverse('olapp:student_course_detail', kwargs={'pk': course.id}))
+        else:
+            # handle unsuccessful payment
+            return render(request, 'payment/payment_unsuccessful.html')
+
+
+# receiver function to listen to valid payment notifications from PayPal
+@receiver(valid_ipn_received)
+def payment_notification(sender, **kwargs):
+    ipn_obj = sender
+
+    if ipn_obj.payment_status == 'Completed':
+        # payment was successful
+        print(f'payment for invoice {ipn_obj.invoice} was successful.')
+
+    else:
+        # payment did not go through
+        print('payment did not go through')
+
+
+class PaymentCancelledView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'olapp/payment_cancelled.html')
+    
+
+class StudentVideoLectureView(View):
+    def get(self, request, *args, **kwargs):
+        videolecture = get_object_or_404(VideoLecture, pk=kwargs['pk'])
+
+        # Check if the instructor has access to the course
+        course = videolecture.course
+        if not course.id in self.request.user.student.courses.values_list('id', flat=True):
+            return HttpResponseForbidden('You do not have access to this course.')
+
+        # Encode the binary data to base64
+        video_b64 = base64.b64encode(videolecture.video).decode('utf-8')
+
+        context = {
+            'video_data': video_b64,
+            'videolecture': videolecture,
+        }
+
+        return render(request, 'olapp/instructor_videolecture_detail.html', context)
+
+
+class MembershipPaymentDoneView(View):
+    def get(self, request, *args, **kwargs):
+        # retrieve the transaction
+        txn = get_object_or_404(PayPalIPN, invoice='G_'+str(request.user.student.id))
+
+        # make sure the transaction was successful
+        if txn.payment_status == "Completed":
+            # upgrade the user's membership to Gold
+            student = Student.objects.get(id=request.user.student.id)
+            student.membership = 'G'
+            student.save()
+
+            # redirect to the student's homepage
+            return redirect('olapp:student_homepage')
+        else:
+            # handle unsuccessful payment
+            return render(request, 'payment/payment_unsuccessful.html')
+
+
+class BuyMembershipView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        # retrieve the student
+        student = Student.objects.get(id=request.user.student.id)
+
+        # Check if the student is already a Gold member
+        if student.membership == 'G':
+            messages.info(request, 'You are already a Gold member.')
+            return redirect('olapp:student_homepage')
+
+        # Define a fixed price for the Gold membership
+        gold_membership_price = 100  # adjust this as necessary
+
+        # Create PayPal form for Gold membership purchase
+        host = "https://a336-24-57-115-201.ngrok-free.app"
+        paypal_dict = {
+            'business': settings.PAYPAL_RECEIVER_EMAIL,
+            'amount': gold_membership_price,
+            'item_name': 'Gold Membership',
+            'invoice': 'G_' + str(student.id),
+            'notify_url': '{}{}'.format(host, reverse('olapp:paypal-ipn')),
+            'return_url': '{}{}'.format(host, reverse('olapp:membership_payment_done')),
+            'cancel_return': '{}{}'.format(host, reverse('olapp:membership_payment_cancelled')),
+        }
+
+        form = PayPalPaymentsForm(initial=paypal_dict)
+        context = {"form": form}
+        return render(request, 'payment/payment.html', context)
+
+
+class MembershipPaymentCancelledView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'olapp/membership_payment_cancelled.html')
