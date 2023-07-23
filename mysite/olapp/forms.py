@@ -49,3 +49,6 @@ class QuizAttemptForm(forms.Form):
                 choices=[(choice.id, choice.choice_text) for choice in choices],
                 widget=forms.CheckboxSelectMultiple
             )
+
+class CourseSearchForm(forms.Form):
+    search_query = forms.CharField(label='Search', max_length=100, error_messages={'required': ''})

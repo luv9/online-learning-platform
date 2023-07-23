@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.utils.decorators import method_decorator
+from django.db.models import Q
 
 # Create your views here.
 
@@ -355,3 +356,29 @@ class QuizScoreView(View):
             }
             return render(request, 'olapp/quiz_score.html', context)
         return HttpResponse('Please attempt the quiz first to display your grade')
+
+class SearchCourseView(View):
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+        if not(request.user.groups.filter(name='students').exists()):
+            return HttpResponse('Please logout and login as the student to access the search page')
+        form = CourseSearchForm(request.GET)
+        courses = Course.objects.all()
+        # query = request.GET.get('q')
+        if form.is_valid():
+            # Perform the search using Q objects to filter the courses
+            query = form.cleaned_data.get('search_query')
+            if query:
+                print('here')
+                courses = courses.filter(
+                    Q(name__icontains=query) | 
+                    Q(description__icontains=query) | 
+                    Q(instructor__first_name__icontains=query) | 
+                    Q(instructor__last_name__icontains=query)
+                )
+            print(courses)
+            print(len(courses))
+            if len(courses) > 0:
+                return render(request, 'olapp/course_search.html', {'form': form, 'courses': courses})
+            return render(request, 'olapp/course_search.html', {'form': form, 'msg': 'No courses found.'})
+        return render(request, 'olapp/course_search.html', {'form': form})

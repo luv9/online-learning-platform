@@ -17,4 +17,5 @@ urlpatterns = [
     path('student/signup', views.StudentSignupView.as_view(), name='student_signup'),
     path('student/course/<int:course_no>/quiz/<int:quiz_no>/attempt', views.AttemptQuizView.as_view(), name='attempt_quiz'),
     path('student/course/<int:course_no>/quiz/<int:quiz_no>/score', views.QuizScoreView.as_view(), name='quiz_score'),
+    path('student/course/search', views.SearchCourseView.as_view(), name='search_course'),
 ]
