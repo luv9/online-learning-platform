@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+import base64
 from django.http import Http404
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.urls import reverse_lazy
@@ -17,6 +18,9 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.http import StreamingHttpResponse, HttpResponseForbidden
 from django.db.models import Q
+from paypal.standard.forms import PayPalPaymentsForm
+from django.urls import reverse
+from django.conf import settings
 
 
 class InstructorCourseListView(LoginRequiredMixin, ListView):
@@ -178,9 +182,19 @@ class StudentSignupView(View):
             return render(request, 'olapp/student_signup.html', {'form': form})
 
 
-class InstructorCourseDetailView(DetailView):
+class InstructorCourseDetailView(LoginRequiredMixin, DetailView):
     model = Course
     template_name = 'olapp/instructor_course_detail.html'
+
+    def get_object(self, queryset=None):
+        """ Retrieve the course only if the logged in user is the instructor """
+        obj = super().get_object(queryset=queryset)
+
+        if not obj.instructor == self.request.user.instructor:
+            messages.error(self.request, 'You do not have permission to view this course.')
+            return redirect('olapp:instructor_course_list')  # redirect to an appropriate URL
+
+        return obj
 
 
 class InstructorVideoLectureCreateView(View):
@@ -226,6 +240,7 @@ class InstructorVideoStreamView(View):
         # Create the HttpResponse with the binary data and the appropriate content type
         response = HttpResponse(videolecture.video, content_type='video/mp4')
         return response
+
 class CreateQuizView(View):
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
@@ -477,3 +492,56 @@ class SearchCourseView(View):
                 return render(request, 'olapp/course_search.html', {'form': form, 'courses': courses})
             return render(request, 'olapp/course_search.html', {'form': form, 'msg': 'No courses found.'})
         return render(request, 'olapp/course_search.html', {'form': form})
+
+class InstructorVideoLectureView(View):
+    def get(self, request, *args, **kwargs):
+        videolecture = get_object_or_404(VideoLecture, pk=kwargs['pk'])
+
+        # Check if the instructor has access to the course
+        course = videolecture.course
+        if course.instructor != request.user.instructor:
+            return HttpResponseForbidden('You do not have access to this course.')
+
+        # Encode the binary data to base64
+        video_b64 = base64.b64encode(videolecture.video).decode('utf-8')
+
+        context = {
+            'video_data': video_b64,
+            'videolecture': videolecture,
+        }
+
+        return render(request, 'olapp/instructor_videolecture_detail.html', context)
+    
+class InstructorQuizDetailView(View):
+    def get(self, request, *args, **kwargs):
+        quiz_id = self.kwargs['pk']
+        quiz = get_object_or_404(Quiz, pk=quiz_id)
+        questions = Question.objects.filter(quiz=quiz)
+        
+        context = {
+            'quiz': quiz,
+            'questions': questions,
+        }
+        return render(request, 'olapp/instructor_quiz_detail.html', context)
+    
+def pay(request):
+    host = "https://5d53-24-57-55-8.ngrok-free.app"  # replace with your ngrok url
+
+    paypal_dict = {
+        "business": settings.PAYPAL_RECEIVER_EMAIL,
+        "amount": "10.00",  # amount to be paid
+        "item_name": "name of the asdasd",
+        "invoice": "unique-invoice-id10",
+        "notify_url": host + reverse('paypal-ipn'),
+        "return_url": host + reverse('olapp:payment_done'),
+        "cancel_return": host + reverse('olapp:payment_cancelled'),
+    }
+
+    form = PayPalPaymentsForm(initial=paypal_dict)
+    return render(request, "payment/pay.html", {"form": form})
+
+def payment_done(request):
+    return render(request, "payment/payment_done.html")
+
+def payment_cancelled(request):
+    return render(request, "payment/payment_cancelled.html")

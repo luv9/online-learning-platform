@@ -13,6 +13,7 @@
         <ul>
             {% for course in courses %}
                 <li>{{ course.name }} - {{ course.instructor.first_name }} {{ course.instructor.last_name }}</li>
+                
             {% endfor %}
         </ul>
     {% endif %}
