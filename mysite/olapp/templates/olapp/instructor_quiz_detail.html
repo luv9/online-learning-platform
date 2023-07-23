@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ quiz.title }}</title>
+</head>
+<body>
+    <h1>{{ quiz.title }}</h1>
+    <p>{{ quiz.description }}</p>
+
+    {% for question in questions %}
+        <h2>{{ question.question_text }}</h2>
+        {% for choice in question.choice_set.all %}
+            <p>{{ choice.choice_text }} - Correct: {{ choice.is_correct }}</p>
+        {% endfor %}
+    {% endfor %}
+</body>
+</html>

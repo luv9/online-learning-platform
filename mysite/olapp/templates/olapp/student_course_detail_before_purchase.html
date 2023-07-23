@@ -1,0 +1,16 @@
+<h1>{{ course.name }}</h1>
+<p>{{ course.description }}</p>
+
+<h2>Video Lectures</h2>
+{% for video_lecture in course.videolecture_set.all %}
+    <h3>{{ video_lecture.title }}</h3>
+
+    </a>
+{% endfor %}
+
+<h2>Quizzes</h2>
+{% for quiz in course.quiz_set.all %}
+    <p>{{ quiz.title }}</p>
+
+{% endfor %}
+

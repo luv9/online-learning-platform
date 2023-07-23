@@ -1,0 +1,12 @@
+<html>
+<body>
+<h1>Pay with PayPal!</h1>
+<script src="https://www.paypal.com/sdk/js?client-id=AdYOPI2E8tNlbP7VT_3NKW0R_v4O218j9XTIo08N9s27KZles-FfUHTbLjRi-D7y70eWcvl7ZigCuCm5"></script>
+
+
+<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+    {% comment %} {% csrf_token %} {% endcomment %}
+    {{ form.render }}
+</form>
+</body>
+</html>

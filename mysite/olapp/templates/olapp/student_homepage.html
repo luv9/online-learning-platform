@@ -1,6 +1,12 @@
 {% extends 'olapp/student_base.html' %}
 {% block body_block %}
     <p>Welcome, {{user.username}}. </p>
+    {% if student.membership == 'G' %}
+        <h4>You are a Gold Member!</h4>
+    {% else %}
+        <a href="{% url 'olapp:buy_membership' %}">
+        <button>Buy Gold Membership</button></a>
+    {% endif %}
     {% if student.courses.all %}
         <h3>Enrolled courses: </h3>
         <ul>
