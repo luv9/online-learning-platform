@@ -15,7 +15,7 @@
 {% for quiz in course.quiz_set.all %}
     <p>{{ quiz.title }}</p>
     <a href="{% url 'olapp:instructor_quiz_detail' pk=quiz.id %}">
-        <button>View Quiz</button>
+        <button>View Quiz</button></a>
 {% endfor %}
 
 <a href="{% url 'olapp:create_quiz' course.id %}">Add Quiz</a>

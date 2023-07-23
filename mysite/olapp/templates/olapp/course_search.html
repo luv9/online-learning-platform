@@ -14,10 +14,10 @@
             {% for course in courses %}
             <li>
                 <!-- Check if the student has already paid for this course -->
-                    {{ course.name }} - {{ course.instructor.first_name }} {{ course.instructor.last_name }}
+                {{ course.name }} - {{ course.instructor.first_name }} {{ course.instructor.last_name }}
+                {% if course not in user.student.courses.all %}
                     <a href="{% url 'olapp:student_course_brief_detail' pk=course.id %}">
                     <button>View Course Overview</button></a>
-                    {% if course not in user.student.courses.all %}
                     {%if user.student.membership == 'G'%}
                         <a href="{% url 'olapp:course_payment' pk=course.id %}">
                         <button>Add</button></a>
@@ -26,7 +26,6 @@
                         <button>Pay</button></a>
                     {%endif%}
                 {% else %}
-                <li>{{ course.name }} - {{ course.instructor.first_name }} {{ course.instructor.last_name }}
                     <a href="{% url 'olapp:student_course_detail' pk=course.id %}">
                     <button>View Course </button></a>
                 {% endif %}

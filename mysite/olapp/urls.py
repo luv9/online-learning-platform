@@ -36,5 +36,6 @@ urlpatterns = [
     path('buy_membership/', views.BuyMembershipView.as_view(), name='buy_membership'),
     path('membership_payment_done/', views.MembershipPaymentDoneView.as_view(), name='membership_payment_done'),
     path('membership_payment_cancelled/', views.MembershipPaymentCancelledView.as_view(), name='membership_payment_cancelled'),
+    path('student/course/<int:course_no>/certificate/', views.download_certificate, name='download_certificate'),
 
 ]

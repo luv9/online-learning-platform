@@ -9,9 +9,13 @@
     {% endif %}
     {% if student.courses.all %}
         <h3>Enrolled courses: </h3>
+
         <ul>
         {% for course in student.courses.all %}
-            <li><p>{{course.name}}</p></li>
+            <li><p>{{course.name}}
+                <a href="{% url 'olapp:student_course_detail' pk=course.id %}">
+                    <button>View Course </button></a></p>
+            </li>
         {% endfor %}
         </ul>
     {% else %}

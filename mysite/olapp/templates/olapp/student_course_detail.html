@@ -1,9 +1,28 @@
+{% load myfilters %}
+
 <h1>{{ course.name }}</h1>
 <p>{{ course.description }}</p>
+
+{% if all_videos_watched and passed_quizzes %}
+    <a href="{% url 'olapp:download_certificate' course_no=course.id %}">
+        <button>Download Certificate</button>
+    </a>
+{% endif %}
 
 <h2>Video Lectures</h2>
 {% for video_lecture in course.videolecture_set.all %}
     <h3>{{ video_lecture.title }}</h3>
+    
+    {% for video_status in video_statuses %}
+        {% if video_status.video.id == video_lecture.id %}
+            {% if video_status.status == 'W' %}
+                <p>Status: Watched</p>
+            {% else %}
+                <p>Status: Not Watched</p>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    
     <a href="{% url 'olapp:student_videolecture_view' pk=video_lecture.id %}">
         <button>View Video</button>
     </a>
@@ -12,7 +31,11 @@
 <h2>Quizzes</h2>
 {% for quiz in course.quiz_set.all %}
     <p>{{ quiz.title }}</p>
-    <a href="{% url 'olapp:instructor_quiz_detail' pk=quiz.id %}">
-        <button>View Quiz</button>
+    {% if quiz.id in attempted_quiz_ids %}
+        <p>Score: {{ quiz_scores|get_item:quiz.id }}%</p>
+    {% else %}
+        <a href="{% url 'olapp:attempt_quiz' course_no=course.id quiz_no=quiz.id %}">
+            <button>Attempt Quiz</button>
+        </a>
+    {% endif %}
 {% endfor %}
-

@@ -102,7 +102,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = ['https://5d53-24-57-55-8.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://a336-24-57-115-201.ngrok-free.app']
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

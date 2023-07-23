@@ -15,6 +15,10 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
+from django.http import HttpResponse
+from django.template.loader import get_template
+from weasyprint import HTML
+from datetime import datetime
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.http import StreamingHttpResponse, HttpResponseForbidden
@@ -566,15 +570,45 @@ class StudentCourseDetailView(LoginRequiredMixin, DetailView):
     template_name = 'olapp/student_course_detail.html'
 
     def get_object(self, queryset=None):
-        """ Retrieve the course only if the logged in user is the instructor """
         obj = super().get_object(queryset=queryset)
-        print(obj)
 
         if not obj.id in self.request.user.student.courses.values_list('id', flat=True):
             messages.error(self.request, 'You do not have permission to view this course.')
             return redirect('olapp:student_homepage')  # redirect to an appropriate URL
 
         return obj
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        course = self.get_object()
+
+        # Retrieve the video statuses
+        video_statuses = VideoStatus.objects.filter(student=self.request.user.student,
+                                                    video__course=course)
+
+        # Check if all videos have been watched
+        all_videos_watched = all([status.status == 'W' for status in video_statuses])
+
+        # Retrieve the quiz scores
+        quiz_scores = QuizScore.objects.filter(student=self.request.user.student,
+                                               quiz__course=course)
+
+        # Convert quiz scores to dictionary
+        quiz_scores_dict = {score.quiz.id: score.score for score in quiz_scores}
+
+        attempted_quiz_ids = quiz_scores_dict.keys()
+
+        # Check if average quiz score is more than 50%
+        average_quiz_score = sum(quiz_scores_dict.values()) / len(quiz_scores_dict) if quiz_scores_dict else 0
+        passed_quizzes = average_quiz_score > 50
+
+        context['video_statuses'] = video_statuses
+        context['quiz_scores'] = quiz_scores_dict
+        context['attempted_quiz_ids'] = attempted_quiz_ids
+        context['all_videos_watched'] = all_videos_watched
+        context['passed_quizzes'] = passed_quizzes
+
+        return context
 
 
 class CoursePaymentView(LoginRequiredMixin, View):
@@ -665,10 +699,19 @@ class StudentVideoLectureView(View):
     def get(self, request, *args, **kwargs):
         videolecture = get_object_or_404(VideoLecture, pk=kwargs['pk'])
 
-        # Check if the instructor has access to the course
+        # Check if the student has access to the course
         course = videolecture.course
         if not course.id in self.request.user.student.courses.values_list('id', flat=True):
             return HttpResponseForbidden('You do not have access to this course.')
+
+        # Set video status to 'Watched'
+        video_status, created = VideoStatus.objects.get_or_create(
+            video=videolecture,
+            student=self.request.user.student,
+            defaults={'status': 'N'}
+        )
+        video_status.status = 'W'
+        video_status.save()
 
         # Encode the binary data to base64
         video_b64 = base64.b64encode(videolecture.video).decode('utf-8')
@@ -733,3 +776,33 @@ class BuyMembershipView(LoginRequiredMixin, View):
 class MembershipPaymentCancelledView(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'olapp/membership_payment_cancelled.html')
+
+
+def download_certificate(request, course_no):
+    # Fetch course details
+    course = get_object_or_404(Course, pk=course_no)
+    
+    # Fetch student details
+    student = request.user.student
+
+    # Fetch average score
+    quiz_scores = QuizScore.objects.filter(student=student, quiz__course=course)
+    average_score = sum([score.score for score in quiz_scores]) / len(quiz_scores) if quiz_scores else 0
+
+    # Render certificate HTML with context data
+    template = get_template('olapp/certificate.html')
+    html = template.render({
+        'course': course,
+        'student': student,
+        'date': datetime.now().strftime('%d %B, %Y'),
+        'average_score': round(average_score, 2),
+    })
+
+    # Convert HTML to PDF with WeasyPrint
+    pdf = HTML(string=html).write_pdf()
+
+    # Create response
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{course.name}_certificate.pdf"'
+
+    return response

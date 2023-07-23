@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+            .certificate {
+                text-align: center;
+                padding: 50px;
+            }
+            .title {
+                font-size: 36px;
+                margin-bottom: 20px;
+            }
+            .subtitle {
+                font-size: 24px;
+                margin-bottom: 50px;
+            }
+            .name {
+                font-size: 48px;
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+            .details {
+                font-size: 18px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="certificate">
+            <div class="title">Completion Certificate</div>
+            <div class="subtitle">This is to certify that</div>
+            <div class="name">{{ student.first_name }} {{ student.last_name }}</div>
+            <div class="subtitle">has successfully completed the course</div>
+            <div class="name">{{ course.name }}</div>
+            <div class="details">
+                <p>Date: {{ date }}</p>
+                <p>Score: {{ average_score }}%</p>
+            </div>
+        </div>
+    </body>
+</html>
