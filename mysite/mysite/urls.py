@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('olapp.urls')),
     path('paypal/', include(paypal_urls)),
+    path('accounts/', include('allauth.urls')),
 
 ]

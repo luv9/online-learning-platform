@@ -38,7 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'olapp.apps.OlappConfig',
-    'paypal.standard.ipn'
+    'paypal.standard.ipn',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account'
 ]
 
 PAYPAL_TEST = True
@@ -130,3 +133,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = ['https://5d53-24-57-55-8.ngrok-free.app']
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
