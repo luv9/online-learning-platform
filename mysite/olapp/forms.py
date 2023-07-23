@@ -2,7 +2,7 @@ from django import forms
 from .models import *
 from django.contrib.auth.forms import UserCreationForm
 from .models import Course
-from .fields import BinaryFileField
+# from .fields import BinaryFileField
 
 
 class InstructorLoginForm(forms.Form):
