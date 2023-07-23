@@ -1,0 +1,73 @@
+/* style.css */
+
+/* Set background color */
+body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    text-align: center;
+    max-width: 600px;
+    margin-left: 410px;
+}
+
+.banner {
+    display: flex;
+    flex-direction: column;
+}
+
+.banner img {
+    width: 200px; /* Set the desired width for the images */
+    margin-bottom: 10px; /* Optional: Add some spacing between images */
+}
+
+/* Customize the heading */
+h1 {
+    color: #0066cc; /* Dark blue */
+    font-family: 'Montserrat', sans-serif; /* Add Montserrat font */
+}
+
+/* Style the form inputs */
+form input[type="text"],
+form input[type="email"],
+form input[type="password"] {
+    width: 250px;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #0066cc; /* Dark blue */
+    border-radius: 5px;
+    font-family: 'Montserrat', sans-serif; /* Add Montserrat font */
+}
+
+/* Style the form submit button */
+form input[type="submit"] {
+    background-color: #009933; /* Green */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif; /* Add Montserrat font */
+    margin-left: 200px; /* button to centre */
+}
+
+/* Add some spacing between elements */
+hr {
+    margin-top: 30px;
+}
+
+.hidden {
+    display: none;
+}
+
+form {
+    display: inline-block;
+    text-align: left;
+}
+
