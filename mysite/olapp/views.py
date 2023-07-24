@@ -212,6 +212,39 @@ class InstructorCourseDetailView(LoginRequiredMixin, DetailView):
 
         return obj
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        course = self.get_object()
+        students = Student.objects.filter(courses=course)
+        student_details = []
+
+        for student in students:
+            # Fetch all video lectures and quizzes for the course
+            video_lectures = VideoLecture.objects.filter(course=course)
+            quizzes = Quiz.objects.filter(course=course)
+
+            # Check if all videos are watched
+            all_videos_watched = all(VideoStatus.objects.filter(student=student, video=video, status='W').exists() for video in video_lectures)
+
+            # Fetch quiz scores
+            quiz_scores = QuizScore.objects.filter(student=student, quiz__in=quizzes)
+            average_score = sum([score.score for score in quiz_scores]) / len(quiz_scores) if quiz_scores else 0
+
+            # Check if all quizzes are completed and score is over 50%
+            all_quizzes_completed = all(QuizScore.objects.filter(student=student, quiz=quiz).exists() for quiz in quizzes)
+            pass_score = average_score >= 50
+
+            student_details.append({
+                'student': student,
+                'all_videos_watched': all_videos_watched,
+                'all_quizzes_completed': all_quizzes_completed,
+                'pass_score': pass_score,
+                'course_completed': all_videos_watched and all_quizzes_completed and pass_score,
+            })
+
+        context['student_details'] = student_details
+        return context
+
 
 class InstructorVideoLectureCreateView(View):
     def get(self, request, *args, **kwargs):

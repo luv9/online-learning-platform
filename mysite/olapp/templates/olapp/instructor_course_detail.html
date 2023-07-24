@@ -21,5 +21,14 @@
             <button>View Quiz</button></a> </p>
     {% endfor %}
     <a href="{% url 'olapp:create_quiz' course.id %}">Add Quiz</a>
+    
+    <h2>Students</h2>
+    {% for detail in student_details %}
+        <h3>{{ detail.student.first_name }} {{ detail.student.last_name }}</h3>
+        <p>All videos watched: {{ detail.all_videos_watched|yesno:"Yes,No" }}</p>
+        <p>All quizzes completed: {{ detail.all_quizzes_completed|yesno:"Yes,No" }}</p>
+        <p>Quiz average score greater than 50: {{ detail.pass_score|yesno:"Yes,No" }}</p>
+        <p>Course Completed: {{ detail.course_completed|yesno:"Yes,No" }}</p>
+    {% endfor %}
 
 {% endblock %}
