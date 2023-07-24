@@ -125,6 +125,8 @@ class InstructorLoginView(View):
             else:
                 return HttpResponse('Your account is disabled')
         else:
+            form = InstructorLoginForm(request.POST)
+            return render(request, 'olapp/instructor_login.html', {'form': form, 'msg': 'Login credentials are incorrect.'})
             return HttpResponse('Login details are incorrect')
 
 class InstructorHomepageView(View):

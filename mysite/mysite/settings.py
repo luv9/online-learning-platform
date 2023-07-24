@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+import environ
+# from django.core.mail import EmailBackend
+from django.core.mail.backends.smtp import EmailBackend
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -104,9 +107,41 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = ['https://a336-24-57-115-201.ngrok-free.app']
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
+
+# AUTHENTICATION_BACKENDS = [
+#     'django.contrib.auth.backends.ModelBackend',
+#     'allauth.account.auth_backends.AuthenticationBackend',
+# ]
+
+# BASE_URL = 'http://localhost:8000'
+SITE_ID = 2
+
+# env = environ.Env()
+
+# from dotenv import load_dotenv
+
+# load_dotenv()
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'olapp9@gmail.com'
+# EMAIL_HOST_PASSWORD = 'dayjgqzhcloikimw'
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+# olapp9@gmail.com
+
+# Asdfgh987654
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'abykuruvila3941@gmail.com'
+EMAIL_HOST_PASSWORD = 'lkjgdnzidhcwabrw'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False

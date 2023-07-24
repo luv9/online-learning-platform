@@ -16,11 +16,16 @@
     <div class="container">
         <h1>{% block myhdg %} Welcome to our online learning platform {% endblock %}</h1>
         {% block body_block %}
+            {% if msg %}
+                <strong style="color:red">{{msg}}</strong>
+            {% endif %}
             <form action="{% url 'olapp:instructor_login' %}" method="post">
                 {% csrf_token %}
                 {{ form }}
                 <input type="submit" value="Login">
             </form>
+            <p><a href = "{% url 'olapp:instructor_signup'%}"> Instructor Signup </a></p>
+            <p><a href="{% url 'password_reset' %}">Forgot Password?</a></p><br/>
         {% endblock %}
     </div>
 </div>

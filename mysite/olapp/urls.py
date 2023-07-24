@@ -1,7 +1,7 @@
 from django.urls import path, include
 from . import views
 from django.views.decorators.csrf import csrf_exempt
-
+from django.contrib.auth import views as auth_views
 
 app_name = 'olapp'
 urlpatterns = [
