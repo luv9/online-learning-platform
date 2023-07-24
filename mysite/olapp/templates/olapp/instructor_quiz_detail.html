@@ -1,9 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ quiz.title }}</title>
-</head>
-<body>
+{% extends 'olapp/instructor_base.html' %}
+{% block body_block %}
     <h1>{{ quiz.title }}</h1>
     <p>{{ quiz.description }}</p>
 
@@ -13,5 +9,6 @@
             <p>{{ choice.choice_text }} - Correct: {{ choice.is_correct }}</p>
         {% endfor %}
     {% endfor %}
-</body>
-</html>
+    <p><a href = "{% url 'olapp:instructor_course_detail' course_no %}"> Back to course page </a><br/></p>
+    
+{% endblock %}

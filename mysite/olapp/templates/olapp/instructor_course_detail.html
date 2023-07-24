@@ -1,21 +1,25 @@
-<h1>{{ course.name }}</h1>
-<p>{{ course.description }}</p>
 
-<h2>Video Lectures</h2>
-{% for video_lecture in course.videolecture_set.all %}
-    <h3>{{ video_lecture.title }}</h3>
-    <a href="{% url 'olapp:instructor_videolecture_view' pk=video_lecture.id %}">
-        <button>View Video</button>
-    </a>
-{% endfor %}
 
-<a href="{% url 'olapp:instructor_add_videolecture' course.id %}">Add Video Lecture</a>
+{% extends 'olapp/instructor_base.html' %}
+{% block body_block %}
+    <h1>{{ course.name }}</h1>
+    <p>{{ course.description }}</p>
 
-<h2>Quizzes</h2>
-{% for quiz in course.quiz_set.all %}
-    <p>{{ quiz.title }}</p>
-    <a href="{% url 'olapp:instructor_quiz_detail' pk=quiz.id %}">
-        <button>View Quiz</button></a>
-{% endfor %}
+    <h2>Video Lectures</h2>
+    {% for video_lecture in course.videolecture_set.all %}
+        <p>{{ video_lecture.title }}
+        <a href="{% url 'olapp:instructor_videolecture_view' pk=video_lecture.id %}">
+            <button>View Video</button> </p>
+        </a>
+    {% endfor %}
+    <a href="{% url 'olapp:instructor_add_videolecture' course.id %}">Add Video Lecture</a>
 
-<a href="{% url 'olapp:create_quiz' course.id %}">Add Quiz</a>
+    <h2>Quizzes</h2>
+    {% for quiz in course.quiz_set.all %}
+        <p>{{ quiz.title }}
+        <a href="{% url 'olapp:instructor_quiz_detail' pk=quiz.id %}">
+            <button>View Quiz</button></a> </p>
+    {% endfor %}
+    <a href="{% url 'olapp:create_quiz' course.id %}">Add Quiz</a>
+
+{% endblock %}

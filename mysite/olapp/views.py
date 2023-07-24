@@ -145,6 +145,7 @@ class StudentHomepageView(View):
         if request.user.groups.filter(name='students').exists():
             context = {
                 'student': request.user.student,
+                'courses': Course.objects.all(),
             }
             return render(request, 'olapp/student_homepage.html', context)
         else:
@@ -361,7 +362,7 @@ def create_questions(request, course_no, quiz_no):
                     Choice.objects.create(question=question, choice_text=text, is_correct=is_correct)
             request.session.pop('current_question', None)
             request.session.pop('questions', None)
-            return HttpResponseRedirect(reverse('olapp:instructor_homepage'))
+            return HttpResponseRedirect(reverse('olapp:instructor_course_detail', args=[course_no]))
 
     else:
         form = ChoiceForm()
@@ -478,6 +479,7 @@ class QuizScoreView(View):
             context = {
                 'quiz_title': quizscore.quiz.title,
                 'score': quizscore.score,
+                'course_no': course.id,
             }
             return render(request, 'olapp/quiz_score.html', context)
         return HttpResponse('Please attempt the quiz first to display your grade')
@@ -536,11 +538,12 @@ class InstructorQuizDetailView(View):
         context = {
             'quiz': quiz,
             'questions': questions,
+            'course_no': quiz.course.id,
         }
         return render(request, 'olapp/instructor_quiz_detail.html', context)
     
 def pay(request):
-    host = "https://5d53-24-57-55-8.ngrok-free.app"  # replace with your ngrok url
+    host = "https://9b2f-142-116-120-106.ngrok-free.app"  # replace with your ngrok url
 
     paypal_dict = {
         "business": settings.PAYPAL_RECEIVER_EMAIL,
@@ -632,7 +635,7 @@ class CoursePaymentView(LoginRequiredMixin, View):
 
         # if they are not, continue with the PayPal form creation process
         else:
-            host = "https://a336-24-57-115-201.ngrok-free.app"
+            host = "https://9b2f-142-116-120-106.ngrok-free.app"
 
             paypal_dict = {
                 'business': settings.PAYPAL_RECEIVER_EMAIL,
@@ -723,7 +726,7 @@ class StudentVideoLectureView(View):
             'videolecture': videolecture,
         }
 
-        return render(request, 'olapp/instructor_videolecture_detail.html', context)
+        return render(request, 'olapp/student_videolecture_detail.html', context)
 
 
 class MembershipPaymentDoneView(View):
@@ -759,7 +762,7 @@ class BuyMembershipView(LoginRequiredMixin, View):
         gold_membership_price = 100  # adjust this as necessary
 
         # Create PayPal form for Gold membership purchase
-        host = "https://a336-24-57-115-201.ngrok-free.app"
+        host = "https://9b2f-142-116-120-106.ngrok-free.app"
         paypal_dict = {
             'business': settings.PAYPAL_RECEIVER_EMAIL,
             'amount': gold_membership_price,

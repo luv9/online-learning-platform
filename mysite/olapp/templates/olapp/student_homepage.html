@@ -21,4 +21,33 @@
     {% else %}
         <h4>You are not enrolled in any courses as of now.</h4>
     {% endif %}
+
+
+    {% if courses|length > 0 %}
+        <h2>Available courses on the website</h2>
+        <ul>
+            {% for course in courses %}
+            
+                <!-- Check if the student has already paid for this course -->
+                
+                {% if course not in user.student.courses.all %}
+                <li>
+                    {{ course.name }} - {{ course.instructor.first_name }} {{ course.instructor.last_name }}&nbsp;
+                    <a href="{% url 'olapp:student_course_brief_detail' pk=course.id %}">
+                    <button> View Course Overview </button></a>&nbsp;
+                    {%if user.student.membership == 'G'%}
+                        <a href="{% url 'olapp:course_payment' pk=course.id %}">
+                        <button> Add </button></a>
+                    {% else %}
+                        <a href="{% url 'olapp:course_payment' pk=course.id %}">
+                        <button> Pay </button></a>
+                    {%endif%}
+                </li>
+                <br/>
+                {% endif %}
+            
+            {% endfor %}
+        </ul>
+    {% endif %}
+
 {% endblock %}

@@ -1,9 +1,9 @@
-{% extends 'olapp/instructor_base.html' %}
+{% extends 'olapp/student_base.html' %}
 {% block body_block %}
     <iframe id="video_player" src="data:video/mp4;base64,{{ video_data }}" width="500" height="300"></iframe>
     <h1 id="video_title">{{ videolecture.title }}</h1>
     <p id="video_description">{{ videolecture.description }}</p>
 
-    <p><a href = "{% url 'olapp:instructor_course_detail' videolecture.course.id %}"> Back to course page </a><br/></p>
+    <p><a href = "{% url 'olapp:student_course_detail' videolecture.course.id %}"> Back to course page </a><br/></p>
     
 {% endblock %}

@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-import environ
+# import environ
 # from django.core.mail import EmailBackend
 from django.core.mail.backends.smtp import EmailBackend
 
@@ -105,7 +105,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = ['https://a336-24-57-115-201.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://9b2f-142-116-120-106.ngrok-free.app']
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
