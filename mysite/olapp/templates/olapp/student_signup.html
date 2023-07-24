@@ -1,33 +1,79 @@
 {% load static %}
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="{% static 'olapp/style.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'olapp/student_signup.css' %}" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
         <title>{% block title %} Student Signup {% endblock %}</title>
+        <script src="{% static 'olapp/script.js' %}"></script>
     </head>
     <body>
-        <div>
+    <div class = "content-wrapper">
+        <div class="banner">
+            <img src="{% static 'olapp/images/image2.png' %}" alt="Image 2">
+            <img src="{% static 'olapp/images/image1.png' %}" alt="Image 1">
+            <img src="{% static 'olapp/images/image3.png' %}" alt="Image 3">
+            <img src="{% static 'olapp/images/image1.png' %}" alt="Image 1">
+         </div>
+        <div class = "container">
             <h1>{% block myhdg %} Welcome to our online learning platform {% endblock %}</h1>
             {% block body_block %}
                 <form action="{% url 'olapp:student_signup' %}", method='post'>
                     {% csrf_token %}
-                    {{form.as_table}}
-                    <input type="submit" value="Signup">
-                </form>
-
-                {% comment %} {% if form.errors %}
-                    <div>
-                        <strong>Error(s):</strong>
-                        <ul>
-                            {% for field_errors in form.errors %}
-                                {% for error in field_errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            {% endfor %}
-                        </ul>
+                    <div class="input-container">
+                        <div class="label-info-container">
+                            <label for="{{ form.username.id_for_label }}">Username:</label>
+                            <button type="button" class="info-btn" onclick="togglePopup('username-rules')">i</button>
+                        </div>
+                        {{ form.username }}
                     </div>
-            {% endif %} {% endcomment %}
+                    <div id="username-rules" class="hidden popup">
+                        <p>Required. 150 characters or fewer. Letters, digits, and @/./+/-/_ only.</p>
+                    </div>
+        
+                    <!-- Inside the <div> for Password -->
+                        <div class="input-container">
+                            <div class="label-info-container">
+                                <label for="{{ form.password1.id_for_label }}">Password:</label>
+                                <button type="button" class="info-btn" onclick="togglePopup('password-rules')">i</button>
+                            </div>
+                            {{ form.password1 }}
+                        </div>
+                        <div id="password-rules" class="hidden popup">
+                            <p>Your password can’t be too similar to your other personal information.</p>
+                            <p>Your password must contain at least 8 characters.</p>
+                            <p>Your password can’t be a commonly used password.</p>
+                            <p>Your password can’t be entirely numeric.</p>
+                        </div>
+        
+                    <!-- Other form fields -->
+                    <div class="input-container">
+                        <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
+                        {{ form.password2 }}
+                    </div>
+                    <div class="input-container">
+                        <label for="{{ form.first_name.id_for_label }}">First Name:</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="input-container">
+                        <label for="{{ form.last_name.id_for_label }}">Last Name:</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="input-container">
+                        <label for="{{ form.email.id_for_label }}">Email:</label>
+                        {{ form.email }}
+                    </div>
+                    <input type="submit" value="Sign up">
+                </form>
             {% endblock %}
         </div>
+    </div>
         <hr />
+        <script src="{% static 'olapp/script.js' %}"></script>
+        <script>
+            function togglePopup(popupId) {
+                var popup = document.getElementById(popupId);
+                popup.classList.toggle("hidden");
+            }
+        </script>
     </body>
 </html>

@@ -1,6 +1,13 @@
-<h2>{% if form.instance.pk %}Edit Course{% else %}New Course{% endif %}</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-</form>
+{% load static %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'olapp/instructor_course_form.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<div class="form-wrapper">
+    <h2>{% if form.instance.pk %}Edit Course{% else %}New Course{% endif %}</h2>
+    <form method="POST" class="course-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+</div>

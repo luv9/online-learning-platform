@@ -1,20 +1,49 @@
 {% extends 'olapp/instructor_base.html' %}
-{% block title %} Courses {%endblock%}
-
-{% block myhdg %} OLAPP {%endblock%}
+{% block title %} Courses {% endblock %}
+{% block myhdg %} {% endblock %}
 {% block body_block %}
+{% load static %}
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'olapp/instructor_course_list.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<div class="navbar">
+    <ul class="nav-list">
+        <li class="nav-item"><a href="{% url 'olapp:instructor_homepage' %}">Home</a></li>
+        <li class="nav-item"><a href="{% url 'olapp:instructor_course_list' %}">Courses</a></li>
+        {% if user.is_authenticated %}
+        <li class="nav-item"><a href="{% url 'olapp:logout' %}">Logout</a></li>
+        {% else %}
+        <li class="nav-item"><a href="{% url 'olapp:instructor_login' %}">Login</a></li>
+        <li class="nav-item"><a href="{% url 'olapp:instructor_register' %}">Register</a></li>
+        {% endif %}
+    </ul>
+</div>
+<div class="banner">
+    <!-- No need for <img> tags here, we'll use CSS for background images -->
+</div>
 
 <h2>Your Courses</h2>
-<a href="{% url 'olapp:instructor_course_create' %}">Add Course</a>
+<a href="{% url 'olapp:instructor_course_create' %}" class="add_course_btn">Add Course <span class="plus_icon">&#43;</span></a>
 <ul>
     {% for course in courses %}
-        <li>
-            <b>Name:</b> {{ course.name }} <b>Price:</b>{{ course.price }} <b>Description:</b>{{ course.description }}
-            <a href="{% url 'olapp:instructor_course_edit' course.id %}">Edit</a>
-            <a href="{% url 'olapp:instructor_course_detail' course.id %}">View</a>
-        </li>
+    <!-- Course Card -->
+    <div class="course-card">
+        <div class="course-info">
+            <h2>{{ course.name }}</h2>
+            <p>{{ course.description }}</p>
+            <h3>{{ course.price }}</h3>
+            <a href="{% url 'olapp:instructor_course_detail' course.id %}" class="view-btn">View</a>
+            <a href="{% url 'olapp:instructor_course_edit' course.id %}" class="edit-btn">Edit</a>
+        </div>
+    </div>
     {% empty %}
-        <li>No courses yet.</li>
+    <div class="no-courses-message">
+        <p>No courses available yet. Get started by creating a new course!</p>
+    </div>
     {% endfor %}
 </ul>
-{%endblock%}
+
+{% endblock %}
